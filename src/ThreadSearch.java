@@ -1,14 +1,14 @@
 import java.util.Set;
 
 public class ThreadSearch implements Runnable{
-		private Set<Client> machines;
+		private Set<IClient> machines;
 		private int ipStartRange;
 		private int ipStopRange;
 		private byte[] ipNet;
 		static int progress;
 		
 		public ThreadSearch(){}
-		public ThreadSearch(byte[] ipNet, int ipStartRange, int ipStopRange, Set<Client> machines){
+		public ThreadSearch(byte[] ipNet, int ipStartRange, int ipStopRange, Set<IClient> machines){
 			this.ipStartRange = ipStartRange;
 			this.ipStopRange = ipStopRange;
 			this.ipNet = ipNet;

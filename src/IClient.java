@@ -1,5 +1,8 @@
 
 public interface IClient{
-	//public int progress = 0;
+	String getHostName();
+	String getIPAddress();
+	String getMacAddress();
+	byte[] getIPAddressByteArr();
 	
 }

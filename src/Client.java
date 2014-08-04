@@ -1,4 +1,8 @@
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -26,8 +30,8 @@ public class Client implements IClient{
 	}
 	
 
-	public static Set<Client> LocalHost(){
-		Set<Client> local = new HashSet<Client>();
+	public static Client LocalHost(){
+		Client local;
 		try {
 			Enumeration<NetworkInterface> nI = NetworkInterface.getNetworkInterfaces();
 			while(nI.hasMoreElements()){
@@ -52,23 +56,56 @@ public class Client implements IClient{
 				Enumeration e = n.getInetAddresses();
 				while(e.hasMoreElements()){
 					InetAddress i = (InetAddress) e.nextElement();
-					if(i.getHostAddress().startsWith("192", 0) || i.getHostAddress().startsWith("10")){
-						Client c = new Client(i.getHostName(), i.getHostAddress());
-						c.setIPAddressByteArr(i.getAddress());
-						c.setMacAddress(sMac);
-						local.add(c);
+					if((i.getHostAddress().startsWith("192") || i.getHostAddress().startsWith("10") || i.getHostAddress().startsWith("172"))){
+						local = new Client(i.getHostName(), i.getHostAddress());
+						local.setIPAddressByteArr(i.getAddress());
+						local.setMacAddress(sMac);
+						return local;
 					}
 				}
 			}
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Error in Client.LocalHost(): " + e.toString());
 		}
-		return local;
+		return null;
 	}
 	
 	public static Client SearchClient(byte[] ip){
 		Client machine = null;
+		if(System.getProperty("os.name").toLowerCase().contains("windows")){
+			StringBuilder sb = new StringBuilder();
+			for(int i = 0; i < 4; i++){
+				if(i == 3){
+					sb.append(ip[i] & 0xFF);
+				}
+				else{
+					sb.append((ip[i] & 0xFF) + ".");
+				}
+			}
+			String sIP = sb.toString();
+			System.out.println("Searching IP Address: " + sIP);
+			Runtime r = Runtime.getRuntime();
+			try {
+				Process p = r.exec("ping -n 1 -w 300 " + sIP);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				StringBuilder sBuild = new StringBuilder();
+				String resp;
+				while((resp = reader.readLine()) != null){
+					sBuild.append(resp);
+				}
+				String reply = sBuild.toString();
+				System.out.println(System.getProperty("os.name") + " " + reply);
+				if(reply.toLowerCase().contains("reply")){
+					System.out.println(sIP + " reply!");
+					machine = new Client(sIP, sIP);
+					return machine;
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				System.out.println(System.getProperty("os.name") + " Error in ping process!");
+			}
+		}
 			try {
 				InetAddress inet = InetAddress.getByAddress(ip);
 				NetworkInterface nI = NetworkInterface.getByInetAddress(inet);
@@ -92,7 +129,7 @@ public class Client implements IClient{
 						String sMac = sb.toString();
 						machine.setMacAddress(sMac);
 					}
-					//System.out.println("Host Name: " + machine.getHostName() + " IP Address: " + machine.getIPAddress() + " Machine Address: " + machine.getMacAddress());
+					System.out.println("Host Name: " + machine.getHostName() + " IP Address: " + machine.getIPAddress() + " Machine Address: " + machine.getMacAddress());
 				}
 				return machine;
 			} catch (UnknownHostException e) {

@@ -25,7 +25,7 @@ public class ProgressBar{
 		private int valueRemaining;
 		
 		public IPProgressBar(){
-			this.max = 254;
+			this.max = 255;
 			this.min = 0;
 			this.curValue = 0;
 			this.isAdjusting = false;

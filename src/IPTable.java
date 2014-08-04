@@ -24,16 +24,16 @@ public class IPTable{
 		private String[] columnNames = {"Local Host Name",
 								"IP Address",
 								"MAC Address"};
-		//private Object[][] data;
 		private Object[][] data;
-		private Set<Client> machines = new HashSet<Client>();
+		private Set<IClient> machines;
 		public IPTableModel(){
-			
+			this.data = new Object[1][3];
+			this.machines = new HashSet<IClient>();
 		}
 		
-		public IPTableModel(Set<Client> machines){
+		public IPTableModel(Set<IClient> machines){
 			this.machines = machines;
-			Client[] arrLocal = machines.toArray(new Client[machines.size()]); 
+			IClient[] arrLocal = machines.toArray(new IClient[machines.size()]); 
 			Object[][] data = new Object[machines.size()][3];
 			for(int x = 0; x < machines.size(); x++){
 				data[x][0] = arrLocal[x].getHostName();
@@ -43,15 +43,24 @@ public class IPTable{
 			this.data = data;
 		}
 		
-		public void newElements(Set<Client> machines){
+		public void newElements(Set<IClient> machines){
 			this.machines = machines;
-			Client[] arrLocal = machines.toArray(new Client[machines.size()]); 
+			IClient[] arrLocal = machines.toArray(new IClient[machines.size()]); 
 			Object[][] data = new Object[machines.size()][3];
 			for(int x = 0; x < machines.size(); x++){
 				data[x][0] = arrLocal[x].getHostName();
 				data[x][1] = arrLocal[x].getIPAddress();
 				data[x][2] = arrLocal[x].getMacAddress();
 			}
+			this.data = data;
+			fireTableDataChanged();
+		}
+		
+		public void hostIP (IClient hostIP){
+			Object[][] data = new Object[1][3];
+			data[0][0] = hostIP.getHostName();
+			data[0][1] = hostIP.getIPAddress();
+			data[0][2] = hostIP.getMacAddress();
 			this.data = data;
 			fireTableDataChanged();
 		}
@@ -68,7 +77,13 @@ public class IPTable{
 
 		@Override
 		public int getRowCount() {
-			return this.machines.size();
+			if(data[0][0] == null){
+				return 0;
+			}
+			else {
+				return this.data.length;
+			}
+			
 		}
 
 		@Override

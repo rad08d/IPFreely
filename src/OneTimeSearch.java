@@ -5,23 +5,23 @@ import javax.swing.JTable;
 import javax.swing.SwingWorker;
 
 public class OneTimeSearch extends SwingWorker<Void, Integer>{
-	private Set<Client> machines;
+	private Set<IClient> machines;
 	private final JProgressBar jpb;
 	private JTable jt;
 	private byte[] ipNet;
 	public OneTimeSearch(JProgressBar jpb, JTable jt, byte[] ipNet){
 		this.jpb = jpb;
 		this.jt = jt;
-		this.machines = new HashSet<Client>();
+		this.machines = new HashSet<IClient>();
 		this.ipNet = ipNet;
 	}
 	@Override
 	protected Void doInBackground() throws Exception {
 		
-		int searchSeg = 255 / 5;				//hard code 5 threads to speed up local search
+		int searchSeg = 255 / 15;				//hard code 5 threads to speed up local search
 		
 		Set<Thread> t = new HashSet<Thread>();
-		for(int i = 0; i < 5; i++){				//partial hard code
+		for(int i = 0; i < 15; i++){				//partial hard code
 			t.add(new Thread(new ThreadSearch(this.ipNet,((i*searchSeg) + 1),((((i + 1)*searchSeg) )), this.machines)));
 		}
 		
@@ -44,8 +44,13 @@ public class OneTimeSearch extends SwingWorker<Void, Integer>{
 	
 	@Override
        protected void done() {
-        	   IPTable.IPTableModel ip = (IPTable.IPTableModel)this.jt.getModel();
-        	   ip.newElements(this.machines);
+			try{
+				IPTable.IPTableModel ip = (IPTable.IPTableModel)this.jt.getModel();
+	        	ip.newElements(this.machines);
+			}
+			catch(Exception e){
+				System.out.println("Error in table data binding: " + e.toString());
+			}
        }
 	
 }
